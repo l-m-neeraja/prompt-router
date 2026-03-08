@@ -1,0 +1,33 @@
+services:
+  prompt-router:
+    build: .
+    image: prompt-router:latest
+    container_name: prompt-router
+    env_file: .env
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - CLASSIFIER_MODEL=${CLASSIFIER_MODEL:-gpt-4o-mini}
+      - GENERATION_MODEL=${GENERATION_MODEL:-gpt-4o}
+      - ROUTE_LOG_PATH=${ROUTE_LOG_PATH:-/app/route_log.jsonl}
+    volumes:
+      - ./route_log.jsonl:/app/route_log.jsonl
+    stdin_open: true
+    tty: true
+    profiles:
+      - cli
+
+  prompt-router-api:
+    build: .
+    image: prompt-router:latest
+    container_name: prompt-router-api
+    env_file: .env
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - CLASSIFIER_MODEL=${CLASSIFIER_MODEL:-gpt-4o-mini}
+      - GENERATION_MODEL=${GENERATION_MODEL:-gpt-4o}
+      - ROUTE_LOG_PATH=${ROUTE_LOG_PATH:-/app/route_log.jsonl}
+    volumes:
+      - ./route_log.jsonl:/app/route_log.jsonl
+    command: ["python", "-m", "uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "8000:8000"
